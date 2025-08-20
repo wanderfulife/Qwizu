@@ -1,6 +1,6 @@
 # SurveyInsights - Complete Documentation
 
-_Last updated: Thu Aug 21 2025 00:47:52 GMT+0200 (Central European Summer Time)_
+_Last updated: August 21, 2025_
 
 ## Project Summary
 
@@ -43,59 +43,42 @@ The application parses both files, maps responses to corresponding questions, an
 
 ### Visual Identity
 - Modern Color Scheme: Implemented a sophisticated gradient-based color palette with primary blues and secondary purples
-- Contemporary Typography: Replaced Roboto with Inter font family for better readability and modern aesthetics
-- Enhanced Components: Updated all Material-UI components with custom styling for cards, buttons, and inputs
+- Contemporary Typography: Using Inter font family for better readability and modern aesthetics
+- Enhanced Components: Custom styled Material-UI components for cards, buttons, and inputs
 - Visual Hierarchy: Improved spacing, typography scales, and visual weight distribution
 
 ### User Interface Components
 
 #### Header
-- Modern Navigation: Added responsive navigation with mobile menu support
-- User Account System: Implemented user menu with profile, settings, and logout options
-- Notification System: Added notification bell with badge indicators
+- Modern Navigation: Responsive navigation with mobile menu support
+- User Account System: User menu with profile, settings, and logout options
+- Notification System: Notification bell with badge indicators
 - Branding: Enhanced logo with gradient text effect
 
 #### Footer
-- Comprehensive Layout: Added multi-column footer with product, resources, and company links
-- Social Media Integration: Included social media icons
+- Comprehensive Layout: Multi-column footer with product, resources, and company links
+- Social Media Integration: Social media icons
 - Professional Styling: Modern spacing and typography
 
 #### File Upload Page
-- Hero Section: Added compelling headline and value proposition
+- Hero Section: Compelling headline and value proposition
 - Enhanced Upload Components: Redesigned file upload areas with better visual feedback
-- Feature Highlights: Added features and benefits section
-- Statistics Display: Included key metrics with gradient backgrounds
+- Feature Highlights: Features and benefits section
+- Statistics Display: Key metrics with gradient backgrounds
 - Responsive Layout: Optimized for all device sizes
 
 #### Processing Page
 - Step-by-Step Progress: Visualized processing steps with status indicators
-- Progress Tracking: Added both circular and linear progress indicators
+- Progress Tracking: Circular and linear progress indicators
 - Detailed Feedback: Enhanced error handling and success states
-- Process Information: Added information panel about the analysis process
+- Process Information: Information panel about the analysis process
 
 #### Results Dashboard
-- Modern Dashboard Layout: Created comprehensive dashboard with summary cards
+- Modern Dashboard Layout: Comprehensive dashboard with summary cards
 - Enhanced Visualizations: Improved chart styling with better colors and animations
-- Tabbed Interface: Organized content with intuitive tab navigation
-- Interactive Elements: Added floating action button for exports
-- Data Summary: Included key metrics with gradient backgrounds
-
-### User Experience Improvements
-
-#### Navigation
-- Intuitive Flow: Clear navigation between upload, processing, and results
-- Breadcrumbs: Added contextual navigation cues
-- Mobile Responsiveness: Fully responsive design for all screen sizes
-
-#### Feedback Systems
-- Real-time Updates: Progress indicators during processing
-- Visual Feedback: Enhanced success and error states
-- Micro-interactions: Subtle animations for better user engagement
-
-#### Data Visualization
-- Enhanced Charts: Improved bar and pie charts with better styling
-- Interactive Elements: Tooltips and hover effects
-- Responsive Charts: Charts that adapt to container sizes
+- Tabbed Interface: Intuitive tab navigation
+- Interactive Elements: Floating action button for exports
+- Data Summary: Key metrics with gradient backgrounds
 
 ## Technical Architecture
 
@@ -114,7 +97,7 @@ The application parses both files, maps responses to corresponding questions, an
 ```
 survey-processor/
 ├── app/
-│   ├── layout.tsx    # Root layout with context provider
+│   ├── layout.tsx    # Root layout with context providers
 │   ├── page.tsx      # Home page (file upload)
 │   ├── processing/   # Processing page
 │   └── results/      # Results page
@@ -124,14 +107,20 @@ survey-processor/
 │   ├── Layout/       # Layout components (Header, Footer)
 │   └── Feedback/     # Feedback components
 ├── contexts/
-│   └── SurveyDataContext.tsx # Application state management
+│   ├── SurveyDataContext.tsx # Survey data state management
+│   └── ErrorContext.tsx      # Error handling and notifications
 ├── lib/
 │   └── surveyProcessor.ts    # Main processing logic
 ├── utils/
 │   ├── excelParser.ts        # Excel file parsing
 │   ├── surveyParser.ts       # Survey structure parsing
 │   ├── dataMapper.ts         # Data mapping logic
-│   └── statistics.ts         # Statistical calculations
+│   ├── statistics.ts         # Statistical calculations
+│   ├── correlation.ts        # Correlation analysis
+│   ├── errorHandler.ts       # Error handling utilities
+│   └── surveyProcessor.ts    # Main processing logic
+├── hooks/
+│   └── useSurveyData.ts      # Custom hook for survey data
 └── theme.ts          # Material UI theme configuration
 ```
 
@@ -256,20 +245,58 @@ type SurveyResponses = SurveyResponse[];
 
 ### Processed Data
 ```typescript
-interface ProcessedQuestionData {
-  questionId: string;
-  questionText: string;
-  type: string;
-  responseCounts: Record<string, number>; // Option ID -> Count
-  responsePercentages: Record<string, number>; // Option ID -> Percentage
-  totalResponses: number;
-  skippedResponses: number;
+interface ProcessedSurveyData {
+  surveyStructure: SurveyStructure;
+  surveyResponses: SurveyResponses;
+  mappedData: MappedData;
+  statistics: SurveyStatistics;
+  validationErrors?: {
+    surveyStructure?: string[];
+    excelData?: string[];
+    mappedData?: string[];
+  };
 }
 
-interface ProcessedData {
-  questions: Record<string, ProcessedQuestionData>;
-  respondentFlow: Record<string, number>; // Flow type -> Count
+interface MappedResponse {
+  questionId: string;
+  questionText: string;
+  responseType: string;
+  responseValue: string | number;
+  responseLabel?: string;
+  isValid: boolean;
+  validationError?: string;
+}
+
+interface MappedRespondent {
+  id: string;
+  responses: MappedResponse[];
+  flowType: 'MONTANTS' | 'ACCOMPAGNATEURS' | 'DESCENDANTS' | 'UNKNOWN';
+  validationErrors?: string[];
+}
+
+type MappedData = MappedRespondent[];
+
+interface ResponseCount {
+  value: string | number;
+  label?: string;
+  count: number;
+  percentage: number;
+}
+
+interface QuestionStatistics {
+  questionId: string;
+  questionText: string;
+  responseType: string;
+  totalResponses: number;
+  skippedResponses: number;
+  responseCounts: ResponseCount[];
+}
+
+interface SurveyStatistics {
+  totalRespondents: number;
+  flowDistribution: Record<string, number>;
   completionRate: number;
+  questions: QuestionStatistics[];
 }
 ```
 
@@ -353,8 +380,8 @@ Benefits:
 - Reduces memory consumption and improves responsiveness
 
 #### 3. Chart Rendering Optimizations
-- Created `OptimizedBarChart` component
-- Created `OptimizedPieChart` component
+- Created `EnhancedBarChart` component
+- Created `EnhancedPieChart` component
 - Added data grouping for datasets with more than a specified number of items
 - Implemented configurable maximum items to display per chart
 
@@ -518,6 +545,7 @@ The application is fully implemented with real data processing capabilities:
 - Created `SurveyDataContext` to manage application state across pages
 - Added context provider to the root layout
 - Implemented proper file passing between pages using React Context
+- Added `ErrorContext` for centralized error handling and notifications
 
 ### Data Flow Implementation
 - Home page stores files in the context when uploaded
@@ -561,7 +589,7 @@ To run the application in development mode:
 npm run dev
 ```
 
-The application will be accessible at [http://localhost:3000](http://localhost:3000).
+The application will be accessible at [http://localhost:3002](http://localhost:3002).
 
 ## Contribution Guidelines
 
