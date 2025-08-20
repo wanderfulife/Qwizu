@@ -18,14 +18,12 @@ import {
 } from '@mui/material';
 import { 
   BarChart as BarChartIcon,
-  PieChart as PieChartIcon,
-  ShowChart as LineChartIcon
+  PieChart as PieChartIcon
 } from '@mui/icons-material';
 import { ProcessedSurveyData } from '@/lib/surveyProcessor';
 import { QuestionStatistics } from '@/utils/statistics';
 import EnhancedBarChart from './EnhancedBarChart';
 import EnhancedPieChart from './EnhancedPieChart';
-import EnhancedLineChart from './EnhancedLineChart';
 import HeatmapChart from './HeatmapChart';
 import ResponseDistributionChart from './ResponseDistributionChart';
 import FlowComparisonChart from './FlowComparisonChart';
@@ -124,16 +122,6 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
             showPercentages={showPercentages}
           />
         );
-      case 'line':
-        return (
-          <EnhancedLineChart 
-            title=""
-            labels={labels}
-            data={data}
-            maxItemsToShow={maxItemsToShow}
-            showPercentages={showPercentages}
-          />
-        );
       default:
         return (
           <EnhancedBarChart 
@@ -194,11 +182,6 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
                   <PieChartIcon fontSize="small" /> Camembert
                 </Box>
               </MenuItem>
-              <MenuItem value="line">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <LineChartIcon fontSize="small" /> Ligne
-                </Box>
-              </MenuItem>
             </Select>
           </FormControl>
           
@@ -235,7 +218,6 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
       </Box>
       
       
-      
       {/* Flow Distribution */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -255,7 +237,6 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
           <SegmentComparison processedData={processedData} />
         </CardContent>
       </Card>
-      
       
       
       {/* Key Insights */}

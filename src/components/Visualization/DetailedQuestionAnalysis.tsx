@@ -19,14 +19,12 @@ import {
 import { 
   BarChart as BarChartIcon,
   PieChart as PieChartIcon,
-  ShowChart as LineChartIcon,
   Insights as InsightsIcon,
   TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { QuestionStatistics } from '@/utils/statistics';
 import EnhancedBarChart from './EnhancedBarChart';
 import EnhancedPieChart from './EnhancedPieChart';
-import EnhancedLineChart from './EnhancedLineChart';
 
 interface DetailedQuestionAnalysisProps {
   question: QuestionStatistics;
@@ -101,11 +99,6 @@ const DetailedQuestionAnalysis: React.FC<DetailedQuestionAnalysisProps> = ({
             sx={{ minHeight: 48 }}
           />
           <Tab 
-            icon={<LineChartIcon />} 
-            label="Ligne" 
-            sx={{ minHeight: 48 }}
-          />
-          <Tab 
             icon={<InsightsIcon />} 
             label="Détails" 
             sx={{ minHeight: 48 }}
@@ -130,14 +123,6 @@ const DetailedQuestionAnalysis: React.FC<DetailedQuestionAnalysisProps> = ({
             />
           )}
           {activeTab === 2 && (
-            <EnhancedLineChart 
-              title=""
-              labels={labels}
-              data={counts}
-              maxItemsToShow={10}
-            />
-          )}
-          {activeTab === 3 && (
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Paper sx={{ p: 2 }}>

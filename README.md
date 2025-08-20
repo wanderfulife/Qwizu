@@ -80,12 +80,14 @@ L'application suit une architecture modulaire avec une séparation claire des re
 
 ## Documentation complète
 
-Pour une documentation détaillée du projet, veuillez consulter le fichier [PROJECT-DOCUMENTATION.md](PROJECT-DOCUMENTATION.md) qui contient :
+Pour une documentation détaillée du projet, veuillez consulter le fichier [CONSOLIDATED-DOCUMENTATION.md](CONSOLIDATED-DOCUMENTATION.md) qui contient :
 - Spécifications techniques complètes
 - Structure des fichiers
 - Logique de traitement des données
 - Architecture de l'application
 - Considérations de performance et de sécurité
+- Instructions d'utilisation
+- Améliorations futures possibles
 
 ## Utilisation
 
