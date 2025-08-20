@@ -30,7 +30,7 @@ import HeatmapChart from './HeatmapChart';
 import ResponseDistributionChart from './ResponseDistributionChart';
 import FlowComparisonChart from './FlowComparisonChart';
 import SegmentComparison from './SegmentComparison';
-import TrendAnalysis from './TrendAnalysis';
+
 import DashboardFilters from './DashboardFilters';
 import ExportVisualization from './ExportVisualization';
 
@@ -256,34 +256,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
         </CardContent>
       </Card>
       
-      {/* Trend Analysis - Only shown if there's time-series data */}
-      {processedData.statistics.totalRespondents > 100 && (
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TrendAnalysis 
-              title="Tendance des réponses"
-              data={[
-                { period: 'Semaine 1', value: Math.min(100, Math.round(processedData.statistics.totalRespondents * 0.2)) },
-                { period: 'Semaine 2', value: Math.min(100, Math.round(processedData.statistics.totalRespondents * 0.3)) },
-                { period: 'Semaine 3', value: Math.min(100, Math.round(processedData.statistics.totalRespondents * 0.25)) },
-                { period: 'Semaine 4', value: Math.min(100, Math.round(processedData.statistics.totalRespondents * 0.25)) },
-              ]}
-            />
-          </Grid>
-          
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TrendAnalysis 
-              title="Taux de complétion"
-              data={[
-                { period: 'Semaine 1', value: 78 },
-                { period: 'Semaine 2', value: 82 },
-                { period: 'Semaine 3', value: 75 },
-                { period: 'Semaine 4', value: processedData.statistics.completionRate },
-              ]}
-            />
-          </Grid>
-        </Grid>
-      )}
+      
       
       {/* Key Insights */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -336,7 +309,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
                     color={question.totalResponses > processedData.statistics.totalRespondents * 0.8 ? 'primary' : 'default'}
                   />
                 </Box>
-                <Box sx={{ height: 200 }}>
+                <Box sx={{ minHeight: 200 }}>
                   {renderChart(question)}
                 </Box>
               </CardContent>

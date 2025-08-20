@@ -23,7 +23,9 @@ import {
   Select,
   MenuItem,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  Pagination,
+  PaginationItem
 } from '@mui/material';
 import { 
   Dashboard as DashboardIcon,
@@ -45,6 +47,7 @@ import EnhancedDashboard from '@/components/Visualization/EnhancedDashboard';
 import DetailedQuestionAnalysis from '@/components/Visualization/DetailedQuestionAnalysis';
 import EnhancedBarChart from '@/components/Visualization/EnhancedBarChart';
 import EnhancedPieChart from '@/components/Visualization/EnhancedPieChart';
+import PaginatedQuestionsList from '@/components/Visualization/PaginatedQuestionsList';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -88,9 +91,12 @@ export default function ResultsPage() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [chartMaxItems, setChartMaxItems] = useState(10);
   const [showRawData, setShowRawData] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    // Reset to first page when changing tabs
+    setCurrentPage(1);
   };
 
   const handleBackToUpload = () => {
@@ -367,7 +373,10 @@ export default function ResultsPage() {
                     <Select
                       value={itemsPerPage}
                       label="Questions/page"
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1); // Reset to first page when changing items per page
+                      }}
                     >
                       <MenuItem value={3}>3</MenuItem>
                       <MenuItem value={5}>5</MenuItem>
@@ -403,23 +412,46 @@ export default function ResultsPage() {
                 </Box>
               </Box>
               
-              <Grid container spacing={3}>
-                {statistics.questions.slice(0, 10).map((question: QuestionStatistics) => (
-                  <Grid size={{ xs: 12 }} key={question.questionId}>
-                    <DetailedQuestionAnalysis 
-                      question={question} 
-                      totalRespondents={statistics.totalRespondents}
-                    />
+              {questionsViewMode === 'pagination' ? (
+                <PaginatedQuestionsList 
+                  questions={statistics.questions}
+                  totalRespondents={statistics.totalRespondents}
+                  itemsPerPage={itemsPerPage}
+                />
+              ) : (
+                <Box>
+                  <Grid container spacing={3}>
+                    {statistics.questions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((question: QuestionStatistics) => (
+                      <Grid size={{ xs: 12 }} key={question.questionId}>
+                        <DetailedQuestionAnalysis 
+                          question={question} 
+                          totalRespondents={statistics.totalRespondents}
+                        />
+                      </Grid>
+                    ))}
                   </Grid>
-                ))}
-              </Grid>
-              
-              {statistics.questions.length > 10 && (
-                <Box sx={{ textAlign: 'center', mt: 3 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Affichage de 10 questions sur {statistics.questions.length}. 
-                    Utilisez les filtres pour explorer davantage.
-                  </Typography>
+                  {/* Pagination for virtualization mode */}
+                  {statistics.questions.length > itemsPerPage && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                      <Pagination
+                        count={Math.ceil(statistics.questions.length / itemsPerPage)}
+                        page={currentPage}
+                        onChange={(event, page) => setCurrentPage(page)}
+                        renderItem={(item) => (
+                          <PaginationItem 
+                            {...item} 
+                            sx={{ 
+                              '&.Mui-selected': { 
+                                backgroundColor: 'primary.main', 
+                                color: 'white',
+                                fontWeight: 600
+                              } 
+                            }} 
+                          />
+                        )}
+                      />
+                    </Box>
+                  )}
                 </Box>
               )}
             </Box>

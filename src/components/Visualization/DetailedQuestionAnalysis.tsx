@@ -112,7 +112,7 @@ const DetailedQuestionAnalysis: React.FC<DetailedQuestionAnalysisProps> = ({
           />
         </Tabs>
         
-        <Box sx={{ mt: 2, height: 200 }}>
+        <Box sx={{ mt: 2, minHeight: 200 }}>
           {activeTab === 0 && (
             <EnhancedBarChart 
               title=""
@@ -138,9 +138,9 @@ const DetailedQuestionAnalysis: React.FC<DetailedQuestionAnalysisProps> = ({
             />
           )}
           {activeTab === 3 && (
-            <Grid container spacing={2} sx={{ height: '100%' }}>
+            <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 2, height: '100%' }}>
+                <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <TrendingUpIcon fontSize="small" /> Top réponses
                   </Typography>
@@ -166,7 +166,7 @@ const DetailedQuestionAnalysis: React.FC<DetailedQuestionAnalysisProps> = ({
               </Grid>
               
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 2, height: '100%' }}>
+                <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
                     Statistiques
                   </Typography>
