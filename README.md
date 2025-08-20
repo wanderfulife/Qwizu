@@ -4,11 +4,33 @@ Application web pour l'analyse des données de questionnaires de satisfaction.
 
 ## Fonctionnalités
 
-- Chargement de la structure du questionnaire (fichier JavaScript)
-- Chargement des réponses au questionnaire (fichier Excel)
-- Analyse et traitement des données
-- Visualisation des résultats sous forme de tableaux et de graphiques
-- Export des résultats
+
+### File Processing
+- Upload and parse survey structure files (JavaScript format)
+- Upload and parse Excel response files (.xlsx format)
+- Validate file formats and content
+- Handle parsing errors gracefully
+
+### Data Analysis
+- Map responses to questions using question IDs
+- Process conditional question flows
+- Aggregate response data by question
+- Calculate response percentages and statistics
+- Identify response patterns and trends
+
+### Data Visualization
+- Interactive charts for response distributions (bar charts, pie charts)
+- Detailed tables for individual responses with sorting and filtering
+- Summary dashboard with key statistics
+- Cross-tabulation views for analyzing relationships between questions
+- Responsive design for all device sizes
+
+### User Experience
+- Intuitive file upload interface
+- Progress indicators during processing
+- Clear error messages and validation
+- Export options for processed data
+- Responsive design for desktop and mobile devices
 
 ## Technologies utilisées
 
@@ -17,6 +39,16 @@ Application web pour l'analyse des données de questionnaires de satisfaction.
 - [Material-UI](https://mui.com/) - Composants d'interface
 - [Chart.js](https://www.chartjs.org/) - Visualisation de données
 - [SheetJS](https://sheetjs.com/) - Lecture de fichiers Excel
+
+## Gestion des erreurs
+
+L'application inclut un système de gestion d'erreurs avancé qui :
+- Affiche des notifications claires et détaillées en cas d'erreur
+- Fournit des messages d'erreur spécifiques pour différents types de problèmes
+- Offre des actions possibles pour résoudre les erreurs
+- Maintient une expérience utilisateur fluide même en cas d'erreur
+
+Pour plus d'informations sur la gestion des erreurs, consultez le [Guide de gestion des erreurs](src/docs/ERROR_HANDLING_GUIDE.md).
 
 ## Installation
 
@@ -49,6 +81,7 @@ src/
 │   ├── FileUpload/   # Composants de chargement de fichiers
 │   ├── Layout/       # Composants de mise en page
 │   └── Visualization/ # Composants de visualisation
+├── contexts/         # Contextes React pour la gestion d'état
 ├── lib/              # Logique métier
 ├── utils/            # Fonctions utilitaires
 └── theme.ts          # Configuration du thème Material-UI
@@ -80,7 +113,7 @@ L'application suit une architecture modulaire avec une séparation claire des re
 
 ## Documentation complète
 
-Pour une documentation détaillée du projet, veuillez consulter le fichier [CONSOLIDATED-DOCUMENTATION.md](CONSOLIDATED-DOCUMENTATION.md) qui contient :
+Pour une documentation détaillée du projet, veuillez consulter le fichier [COMPREHENSIVE_DOCUMENTATION.md](COMPREHENSIVE_DOCUMENTATION.md) qui contient :
 - Spécifications techniques complètes
 - Structure des fichiers
 - Logique de traitement des données
@@ -88,6 +121,8 @@ Pour une documentation détaillée du projet, veuillez consulter le fichier [CON
 - Considérations de performance et de sécurité
 - Instructions d'utilisation
 - Améliorations futures possibles
+
+Cette documentation est automatiquement mise à jour à chaque commit grâce à notre système de documentation automatisé. Pour plus d'informations sur ce système, consultez [DOCUMENTATION_SYSTEM.md](DOCUMENTATION_SYSTEM.md).
 
 ## Utilisation
 

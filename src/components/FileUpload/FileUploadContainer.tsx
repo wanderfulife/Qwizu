@@ -4,7 +4,6 @@ import {
   Button, 
   Typography, 
   Alert, 
-  Snackbar,
   Grid,
   Paper,
   Divider
@@ -12,6 +11,7 @@ import {
 import { UploadFile as UploadFileIcon, Description as DescriptionIcon } from '@mui/icons-material';
 import SurveyFileUpload from './SurveyFileUpload';
 import ResponseFileUpload from './ResponseFileUpload';
+import { useErrorHandler } from '@/utils/errorHandler';
 
 interface FileUploadContainerProps {
   onFilesUploaded: (surveyContent: string, responseFile: File) => void;
@@ -21,40 +21,41 @@ const FileUploadContainer: React.FC<FileUploadContainerProps> = ({ onFilesUpload
   const [surveyContent, setSurveyContent] = useState<string | null>(null);
   const [responseFile, setResponseFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const { handleFileUploadError, showSuccess } = useErrorHandler();
 
   const handleSurveyFileUpload = (content: string, fileName: string) => {
     setSurveyContent(content);
-    setSnackbarMessage(`Fichier questionnaire chargé: ${fileName}`);
-    setSnackbarOpen(true);
+    showSuccess('Fichier chargé', `Fichier questionnaire chargé: ${fileName}`);
     setError(null);
   };
 
   const handleResponseFileUpload = (file: File) => {
     setResponseFile(file);
-    setSnackbarMessage(`Fichier réponses chargé: ${file.name}`);
-    setSnackbarOpen(true);
+    showSuccess('Fichier chargé', `Fichier réponses chargé: ${file.name}`);
     setError(null);
   };
 
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
-    setSnackbarMessage(errorMessage);
-    setSnackbarOpen(true);
+    // We're already showing the error via the notification system in the file upload components
+    // So we don't need to duplicate it here
   };
 
   const handleProcessFiles = () => {
     if (!surveyContent || !responseFile) {
-      setError('Veuillez télécharger les deux fichiers');
+      const errorMsg = 'Veuillez télécharger les deux fichiers';
+      setError(errorMsg);
+      handleFileUploadError(new Error(errorMsg), 'survey');
       return;
     }
 
-    onFilesUploaded(surveyContent, responseFile);
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
+    try {
+      onFilesUploaded(surveyContent, responseFile);
+    } catch (err) {
+      const errorMsg = 'Erreur lors du lancement. Veuillez réessayer.';
+      setError(errorMsg);
+      handleFileUploadError(err, 'survey');
+    }
   };
 
   return (
@@ -179,14 +180,7 @@ const FileUploadContainer: React.FC<FileUploadContainerProps> = ({ onFilesUpload
         Lancer l&apos;analyse
       </Button>
       
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        message={snackbarMessage}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      />
-    </Box>
+      </Box>
   );
 };
 

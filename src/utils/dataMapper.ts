@@ -29,11 +29,11 @@ export class DataMapper {
    */
   static mapData(surveyStructure: SurveyStructure, surveyResponses: SurveyResponses): MappedData {
     if (!surveyStructure || !Array.isArray(surveyStructure)) {
-      throw new Error('Structure du questionnaire invalide');
+      throw new Error('Structure du questionnaire invalide. Veuillez vérifier votre fichier surveyQuestions.js.');
     }
     
     if (!surveyResponses || !Array.isArray(surveyResponses)) {
-      throw new Error('Données de réponse invalide');
+      throw new Error('Données de réponse invalide. Veuillez vérifier votre fichier Excel de réponses.');
     }
     
     return surveyResponses.map((response, index) => {

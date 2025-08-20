@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { 
   Container, 
   Typography, 
@@ -39,10 +39,13 @@ import { useRouter } from 'next/navigation';
 import { SurveyProcessor, ProcessedSurveyData } from '@/lib/surveyProcessor';
 import { useSurveyData } from '@/contexts/SurveyDataContext';
 import RealTimeVisualization from '@/components/Visualization/RealTimeVisualization';
+import { useErrorHandler } from '@/utils/errorHandler';
 
 export default function ProcessingPage() {
   const router = useRouter();
   const { surveyContent, responseFile, setProcessedData } = useSurveyData();
+  const { handleProcessingError } = useErrorHandler();
+  const hasProcessed = useRef(false); // Ref to track if we've already processed the files
   const [processingStatus, setProcessingStatus] = useState('Initialisation du traitement...');
   const [processingSteps, setProcessingSteps] = useState<Array<{ 
     id: number; 
@@ -63,12 +66,21 @@ export default function ProcessingPage() {
   const [processedData, setProcessedDataState] = useState<ProcessedSurveyData | null>(null);
 
   useEffect(() => {
+    // Only process files once
+    if (hasProcessed.current) {
+      return;
+    }
+    
     const processFiles = async () => {
       try {
         // Check if we have the required files
         if (!surveyContent || !responseFile) {
-          throw new Error('Fichiers manquants. Veuillez revenir à la page de chargement.');
+          const errorMsg = 'Fichiers manquants. Veuillez revenir à la page de chargement.';
+          throw new Error(errorMsg);
         }
+        
+        // Mark as processed to prevent re-running
+        hasProcessed.current = true;
         
         // Update step 1
         setProcessingStatus('Lecture du fichier de structure du questionnaire...');
@@ -131,14 +143,18 @@ export default function ProcessingPage() {
           step.id === 6 ? { ...step, status: 'processing' } : step
         ));
         setProgress(95);
-        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Process the files using the survey processor
+        const data = await SurveyProcessor.processSurveyData(surveyContent, responseFile);
+        
+        // Mark step 6 as completed after processing
         setProcessingSteps(prev => prev.map(step => 
           step.id === 6 ? { ...step, status: 'completed' } : step
         ));
         setProgress(100);
         
-        // Process the files using the survey processor
-        const data = await SurveyProcessor.processSurveyData(surveyContent, responseFile);
+        // Small delay to ensure step status update is rendered
+        await new Promise(resolve => setTimeout(resolve, 10));
         
         // Check for validation errors
         if (data.validationErrors) {
@@ -151,7 +167,9 @@ export default function ProcessingPage() {
         setIsComplete(true);
         setProcessingStatus('Traitement terminé avec succès !');
       } catch (err) {
-        setError('Une erreur est survenue lors du traitement des fichiers: ' + (err as Error).message);
+        const errorMsg = err instanceof Error ? err.message : 'Une erreur inconnue est survenue lors du traitement des fichiers.';
+        setError(errorMsg);
+        handleProcessingError(err);
         console.error(err);
         // Mark current step as error
         setProcessingSteps(prev => prev.map(step => 
@@ -161,7 +179,12 @@ export default function ProcessingPage() {
     };
 
     processFiles();
-  }, [surveyContent, responseFile, setProcessedData]);
+    
+    // Cleanup function to reset the ref when component unmounts
+    return () => {
+      hasProcessed.current = false;
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleViewResults = () => {
     router.push('/results');
@@ -169,6 +192,15 @@ export default function ProcessingPage() {
 
   const handleBackToUpload = () => {
     router.push('/');
+  };
+
+  const handleRetry = () => {
+    // Reset state and try again
+    setError(null);
+    setIsComplete(false);
+    setProgress(0);
+    setProcessingSteps(prev => prev.map(step => ({ ...step, status: 'pending' })));
+    setProcessingStatus('Initialisation du traitement...');
   };
 
   const getStatusIcon = (status: 'pending' | 'processing' | 'completed' | 'error') => {
@@ -345,15 +377,31 @@ export default function ProcessingPage() {
                         <ErrorIcon sx={{ fontSize: 32 }} />
                       </Avatar>
                       <Alert severity="error" sx={{ mb: 3 }}>
-                        {error}
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                          Erreur de traitement
+                        </Typography>
+                        <Typography variant="body1" sx={{ mb: 2 }}>
+                          {error}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          Vous pouvez corriger le problème et réessayer, ou revenir à la page de chargement pour importer de nouveaux fichiers.
+                        </Typography>
                       </Alert>
-                      <Button 
-                        variant="contained" 
-                        onClick={handleBackToUpload}
-                        startIcon={<ArrowBackIcon />}
-                      >
-                        Retour au chargement
-                      </Button>
+                      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+                        <Button 
+                          variant="contained" 
+                          onClick={handleRetry}
+                          startIcon={<ArrowBackIcon />}
+                        >
+                          Réessayer
+                        </Button>
+                        <Button 
+                          variant="outlined" 
+                          onClick={handleBackToUpload}
+                        >
+                          Retour au chargement
+                        </Button>
+                      </Box>
                     </>
                   ) : isComplete ? (
                     <>
@@ -468,7 +516,7 @@ export default function ProcessingPage() {
                           </ListItemIcon>
                           <ListItemText 
                             primary={step.title} 
-                            secondary={step.status === 'processing' ? 'En cours de traitement...' : getStatusText(step.status)}
+                            secondary={getStatusText(step.status) + (step.status === 'processing' ? ' de traitement...' : '')}
                           />
                           <Chip 
                             label={getStatusText(step.status)} 

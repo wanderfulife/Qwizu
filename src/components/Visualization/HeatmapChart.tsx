@@ -9,10 +9,13 @@ import {
   Title, 
   Tooltip, 
   Legend,
-  ChartData
+  ChartData,
+  TooltipItem
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { QuestionStatistics } from '@/utils/statistics';
+import { useSurveyData } from '@/contexts/SurveyDataContext';
+import { calculateCorrelationMatrix } from '@/utils/correlation';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -22,68 +25,61 @@ interface HeatmapChartProps {
 }
 
 const HeatmapChart: React.FC<HeatmapChartProps> = ({ data, title }) => {
-  // For demonstration purposes, we'll create a correlation matrix
-  // In a real implementation, this would be based on actual correlations between responses
-  const questions = data.map(q => q.questionText.substring(0, 30) + (q.questionText.length > 30 ? '...' : ''));
+  const { processedData } = useSurveyData();
   
-  // Generate a mock correlation matrix
-  const generateCorrelationMatrix = () => {
-    const matrix = [];
-    for (let i = 0; i < questions.length; i++) {
-      const row = [];
-      for (let j = 0; j < questions.length; j++) {
-        if (i === j) {
-          row.push(100); // Perfect correlation with itself
-        } else {
-          // Generate a random correlation value between -100 and 100
-          row.push(Math.floor(Math.random() * 201) - 100);
-        }
-      }
-      matrix.push(row);
+  // Calculate actual correlation matrix from the data
+  const { correlationMatrix, labels } = useMemo(() => {
+    if (!processedData || !processedData.mappedData || data.length === 0) {
+      // Return empty data if no processed data
+      return { correlationMatrix: [], labels: [] };
     }
-    return matrix;
-  };
-  
-  const correlationMatrix = generateCorrelationMatrix();
-  
-  // Convert matrix to heatmap data
-  const heatmapData = [];
-  const labelsX = questions;
-  const labelsY = questions;
-  
-  for (let i = 0; i < correlationMatrix.length; i++) {
-    for (let j = 0; j < correlationMatrix[i].length; j++) {
-      heatmapData.push({
-        x: labelsX[j],
-        y: labelsY[i],
-        v: correlationMatrix[i][j]
-      });
+    
+    try {
+      // Calculate correlation matrix using real data
+      const matrix = calculateCorrelationMatrix(processedData.mappedData, data);
+      const questions = data.map(q => 
+        q.questionText.substring(0, 30) + (q.questionText.length > 30 ? '...' : '')
+      );
+      
+      return { correlationMatrix: matrix, labels: questions };
+    } catch (error) {
+      console.error('Error calculating correlation matrix:', error);
+      // Return empty data if error occurs
+      return { correlationMatrix: [], labels: [] };
     }
-  }
+  }, [processedData, data]);
   
-  // For a real heatmap implementation, we would use a specialized chart library
-  // For now, we'll use a bar chart to represent the concept
-  
-  const chartData: ChartData<'bar'> = {
-    labels: labelsX,
-    datasets: correlationMatrix.map((row, index) => ({
-      label: labelsY[index],
-      data: row,
-      backgroundColor: row.map(value => {
-        if (value > 50) return 'rgba(239, 68, 68, 0.7)'; // Strong positive correlation
-        if (value > 0) return 'rgba(251, 191, 36, 0.7)'; // Weak positive correlation
-        if (value > -50) return 'rgba(16, 185, 129, 0.7)'; // Weak negative correlation
-        return 'rgba(59, 130, 246, 0.7)'; // Strong negative correlation
-      }),
-      borderColor: row.map(value => {
-        if (value > 50) return 'rgba(239, 68, 68, 1)';
-        if (value > 0) return 'rgba(251, 191, 36, 1)';
-        if (value > -50) return 'rgba(16, 185, 129, 1)';
-        return 'rgba(59, 130, 246, 1)';
-      }),
-      borderWidth: 1,
-    }))
-  };
+  // Convert correlation matrix to chart data
+  const chartData: ChartData<'bar'> = useMemo(() => {
+    if (correlationMatrix.length === 0 || labels.length === 0) {
+      return {
+        labels: [],
+        datasets: []
+      };
+    }
+    
+    return {
+      labels: labels,
+      datasets: correlationMatrix.map((row, index) => ({
+        label: labels[index],
+        data: row.map(value => Math.round(value * 100)), // Convert to percentage for display
+        backgroundColor: row.map(value => {
+          // Color based on correlation strength and direction
+          if (value > 0.5) return 'rgba(239, 68, 68, 0.7)'; // Strong positive correlation
+          if (value > 0) return 'rgba(251, 191, 36, 0.7)'; // Weak positive correlation
+          if (value > -0.5) return 'rgba(16, 185, 129, 0.7)'; // Weak negative correlation
+          return 'rgba(59, 130, 246, 0.7)'; // Strong negative correlation
+        }),
+        borderColor: row.map(value => {
+          if (value > 0.5) return 'rgba(239, 68, 68, 1)';
+          if (value > 0) return 'rgba(251, 191, 36, 1)';
+          if (value > -0.5) return 'rgba(16, 185, 129, 1)';
+          return 'rgba(59, 130, 246, 1)';
+        }),
+        borderWidth: 1,
+      }))
+    };
+  }, [correlationMatrix, labels]);
 
   const options = {
     indexAxis: 'y' as const,
@@ -119,11 +115,20 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data, title }) => {
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,
+        callbacks: {
+          label: function(context: TooltipItem<'bar'>) {
+            const label = context.dataset.label || '';
+            const value = context.parsed.x;
+            return `${label}: ${value}%`;
+          }
+        }
       },
     },
     scales: {
       x: {
         stacked: false,
+        min: -100,
+        max: 100,
         grid: {
           display: false,
         },
@@ -133,6 +138,9 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data, title }) => {
           },
           maxRotation: 45,
           minRotation: 45,
+          callback: function(value: number | string) {
+            return Number(value).toString() + '%';
+          }
         },
       },
       y: {
@@ -156,14 +164,14 @@ const HeatmapChart: React.FC<HeatmapChartProps> = ({ data, title }) => {
   // Optimize rendering for performance
   const memoizedChartData = useMemo(() => ({
     labels: chartData.labels,
-    datasets: chartData.datasets.map(dataset => ({ ...dataset }))
+    datasets: chartData.datasets?.map(dataset => ({ ...dataset })) || []
   }), [chartData.labels, chartData.datasets]);
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedOptions = useMemo(() => options, []);
 
   return (
-    <div style={{ height: '200px', position: 'relative' }}>
+    <div style={{ height: '400px', position: 'relative' }}>
       <Bar 
         data={memoizedChartData} 
         options={memoizedOptions}

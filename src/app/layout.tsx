@@ -7,6 +7,8 @@ import theme from '@/theme';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import { SurveyDataProvider } from '@/contexts/SurveyDataContext';
+import { ErrorProvider } from '@/contexts/ErrorContext';
+import NotificationContainer from '@/components/Feedback/NotificationContainer';
 import '@/app/globals.css';
 
 export const metadata: Metadata = {
@@ -22,13 +24,16 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           <ThemeProvider theme={theme}>
             {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
             <CssBaseline />
-            <SurveyDataProvider>
-              <Header />
-              <main style={{ minHeight: 'calc(100vh - 140px)' }}>
-                {props.children}
-              </main>
-              <Footer />
-            </SurveyDataProvider>
+            <ErrorProvider>
+              <SurveyDataProvider>
+                <Header />
+                <main style={{ minHeight: 'calc(100vh - 140px)' }}>
+                  {props.children}
+                </main>
+                <Footer />
+                <NotificationContainer />
+              </SurveyDataProvider>
+            </ErrorProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

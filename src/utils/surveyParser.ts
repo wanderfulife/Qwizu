@@ -27,13 +27,13 @@ export class SurveyParser {
     try {
       // Check if content is empty
       if (!content || content.trim().length === 0) {
-        throw new Error('Le fichier de structure du questionnaire est vide');
+        throw new Error('Le fichier de structure du questionnaire est vide. Veuillez vérifier que votre fichier surveyQuestions.js contient des données.');
       }
       
       // Extract the array content from the JavaScript export
       const match = content.match(/export\s+const\s+templateSurveyQuestions\s*=\s*(\[[\s\S]*\])\s*;?/);
       if (!match) {
-        throw new Error('Impossible de trouver la structure du questionnaire dans le fichier. Le fichier doit contenir une variable "templateSurveyQuestions" exportée.');
+        throw new Error('Impossible de trouver la structure du questionnaire dans le fichier. Le fichier doit contenir une variable "templateSurveyQuestions" exportée. Veuillez vérifier la structure de votre fichier surveyQuestions.js.');
       }
       
       let jsonArray = match[1];
@@ -58,22 +58,25 @@ export class SurveyParser {
       try {
         surveyStructure = JSON.parse(jsonArray);
       } catch (parseError) {
-        throw new Error(`Erreur de syntaxe dans le fichier de structure: ${parseError instanceof Error ? parseError.message : 'Erreur inconnue'}`);
+        throw new Error(`Erreur de syntaxe dans le fichier de structure: ${parseError instanceof Error ? parseError.message : 'Erreur inconnue'}. Veuillez vérifier que votre fichier surveyQuestions.js est syntaxiquement correct.`);
       }
       
       // Validate the structure
       if (!Array.isArray(surveyStructure)) {
-        throw new Error('La structure du questionnaire doit être un tableau');
+        throw new Error('La structure du questionnaire doit être un tableau. Veuillez vérifier la structure de votre fichier surveyQuestions.js.');
       }
       
       if (surveyStructure.length === 0) {
-        throw new Error('La structure du questionnaire est vide');
+        throw new Error('La structure du questionnaire est vide. Veuillez ajouter des questions à votre questionnaire.');
       }
       
       // Validate each question with detailed error messages
       const validationErrors = this.validateSurveyStructure(surveyStructure);
       if (validationErrors.length > 0) {
-        throw new Error(`Erreurs de validation dans la structure du questionnaire:\n${validationErrors.join('\n')}`);
+        const errorMessage = "Erreurs de validation dans la structure du questionnaire:\n" + 
+          validationErrors.join("\n") + 
+          "\n\nVeuillez corriger ces erreurs dans votre fichier surveyQuestions.js.";
+        throw new Error(errorMessage);
       }
       
       return surveyStructure;
@@ -81,7 +84,7 @@ export class SurveyParser {
       if (error instanceof Error) {
         throw new Error(`Erreur lors de l'analyse du fichier de structure: ${error.message}`);
       } else {
-        throw new Error(`Erreur lors de l'analyse du fichier de structure: Erreur inconnue`);
+        throw new Error(`Erreur lors de l'analyse du fichier de structure: Erreur inconnue. Veuillez vérifier votre fichier surveyQuestions.js.`);
       }
     }
   }

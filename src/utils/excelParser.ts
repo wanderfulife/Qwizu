@@ -32,7 +32,7 @@ export class ExcelParser {
           
           // Check if workbook has sheets
           if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-            reject(new Error('Le fichier Excel ne contient aucune feuille de calcul'));
+            reject(new Error('Le fichier Excel ne contient aucune feuille de calcul. Veuillez vérifier que votre fichier Excel contient des données.'));
             return;
           }
           
@@ -41,7 +41,7 @@ export class ExcelParser {
           const worksheet = workbook.Sheets[firstSheetName];
           
           if (!worksheet) {
-            reject(new Error(`La feuille de calcul "${firstSheetName}" est vide ou corrompue`));
+            reject(new Error('La feuille de calcul "' + firstSheetName + '" est vide ou corrompue. Veuillez vérifier votre fichier Excel.'));
             return;
           }
           
@@ -50,7 +50,7 @@ export class ExcelParser {
           
           // Validate data structure
           if (!Array.isArray(jsonData)) {
-            reject(new Error('Les données du fichier Excel ne sont pas dans un format valide'));
+            reject(new Error('Les données du fichier Excel ne sont pas dans un format valide. Veuillez vérifier la structure de votre fichier.'));
             return;
           }
           
@@ -59,24 +59,24 @@ export class ExcelParser {
           if (error instanceof Error) {
             // Provide more specific error messages based on the error type
             if (error.message.includes('magic number') || error.message.includes('File format')) {
-              reject(new Error('Le fichier sélectionné n\'est pas un fichier Excel valide (.xlsx)'));
+              reject(new Error("Le fichier sélectionné n'est pas un fichier Excel valide (.xlsx). Veuillez vous assurer que vous avez sélectionné un fichier Excel au format .xlsx."));
             } else if (error.message.includes('password')) {
-              reject(new Error('Le fichier Excel est protégé par un mot de passe'));
+              reject(new Error('Le fichier Excel est protégé par un mot de passe. Veuillez fournir un fichier Excel non protégé.'));
             } else {
-              reject(new Error(`Erreur lors de l'analyse du fichier Excel: ${error.message}`));
+              reject(new Error("Erreur lors de l'analyse du fichier Excel: " + error.message + ". Veuillez vérifier que votre fichier Excel est valide et non corrompu."));
             }
           } else {
-            reject(new Error('Erreur inconnue lors de l\'analyse du fichier Excel'));
+            reject(new Error("Erreur inconnue lors de l'analyse du fichier Excel. Veuillez réessayer avec un autre fichier."));
           }
         }
       };
       
       reader.onerror = () => {
-        reject(new Error('Erreur lors de la lecture du fichier. Veuillez vérifier que le fichier est accessible.'));
+        reject(new Error('Erreur lors de la lecture du fichier. Veuillez vérifier que le fichier est accessible et non corrompu.'));
       };
       
       reader.onabort = () => {
-        reject(new Error('Lecture du fichier interrompue'));
+        reject(new Error('Lecture du fichier interrompue. Veuillez réessayer de charger le fichier.'));
       };
       
       reader.readAsArrayBuffer(file);
@@ -131,7 +131,7 @@ export class ExcelParser {
     const firstRow = data[0];
     
     if (typeof firstRow !== 'object' || firstRow === null) {
-      errors.push('La première ligne du fichier Excel n\'est pas dans un format valide');
+      errors.push("La première ligne du fichier Excel n'est pas dans un format valide");
       return errors;
     }
     
@@ -140,7 +140,7 @@ export class ExcelParser {
     const missingColumns = requiredColumns.filter(column => !(column in firstRow));
     
     if (missingColumns.length > 0) {
-      errors.push(`Colonnes manquantes dans le fichier Excel: ${missingColumns.join(', ')}`);
+      errors.push('Colonnes manquantes dans le fichier Excel: ' + missingColumns.join(', '));
     }
     
     // Check for data consistency
@@ -149,7 +149,7 @@ export class ExcelParser {
     ).length;
     
     if (emptyRows > 0) {
-      errors.push(`${emptyRows} ligne(s) vide(s) trouvée(s) dans le fichier Excel`);
+      errors.push(emptyRows + ' ligne(s) vide(s) trouvée(s) dans le fichier Excel');
     }
     
     // Check for duplicate ID_questionnaire values
@@ -158,7 +158,7 @@ export class ExcelParser {
     if (ids.length !== uniqueIds.size) {
       const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
       const uniqueDuplicates = [...new Set(duplicates)];
-      errors.push(`Des doublons ont été trouvés dans la colonne ID_questionnaire. ${uniqueDuplicates.length} ID(s) dupliqué(s) trouvé(s): ${uniqueDuplicates.slice(0, 5).join(', ')}${uniqueDuplicates.length > 5 ? '...' : ''}`);
+      errors.push("Des doublons ont été trouvés dans la colonne ID_questionnaire. " + uniqueDuplicates.length + " ID(s) dupliqué(s) trouvé(s): " + uniqueDuplicates.slice(0, 5).join(", ") + (uniqueDuplicates.length > 5 ? "..." : ""));
     }
     
     return errors;

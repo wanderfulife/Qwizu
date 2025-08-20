@@ -6,6 +6,7 @@ import {
   TableChart as TableChartIcon,
   Info as InfoIcon
 } from '@mui/icons-material';
+import { useErrorHandler } from '@/utils/errorHandler';
 
 interface ResponseFileUploadProps {
   onFileUpload: (file: File) => void;
@@ -14,33 +15,67 @@ interface ResponseFileUploadProps {
 
 const ResponseFileUpload: React.FC<ResponseFileUploadProps> = ({ onFileUpload, onError }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { handleFileUploadError } = useErrorHandler();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    try {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    // Check file type
-    if (!file.name.endsWith('.xlsx')) {
-      onError('Le fichier doit être un fichier Excel (.xlsx)');
-      return;
-    }
+      // Check file type
+      if (!file.name.endsWith('.xlsx')) {
+        const errorMsg = 'Le fichier doit être un fichier Excel (.xlsx)';
+        onError(errorMsg);
+        handleFileUploadError(new Error(errorMsg), 'response');
+        return;
+      }
 
-    // Check file size (limit to 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      onError('Le fichier est trop volumineux. La taille maximale autorisée est de 10 Mo.');
-      return;
-    }
+      // Check file size (limit to 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        const errorMsg = 'Le fichier est trop volumineux. La taille maximale autorisée est de 10 Mo.';
+        onError(errorMsg);
+        handleFileUploadError(new Error(errorMsg), 'response');
+        return;
+      }
 
-    onFileUpload(file);
+      // Additional validation for Excel files
+      try {
+        // Basic check for Excel file signature (this is a simplified check)
+        // In a real application, we might use a library like xlsx to validate the file
+        if (file.size < 512) {
+          const errorMsg = 'Le fichier Excel semble corrompu ou incomplet.';
+          onError(errorMsg);
+          handleFileUploadError(new Error(errorMsg), 'response');
+          return;
+        }
+      } catch (validationError) {
+        const errorMsg = `Erreur lors de la validation du fichier Excel: ${(validationError as Error).message}`;
+        onError(errorMsg);
+        handleFileUploadError(validationError, 'response');
+        return;
+      }
 
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      onFileUpload(file);
+    } catch (error) {
+      const errorMsg = `Erreur inattendue lors du traitement du fichier Excel: ${error instanceof Error ? error.message : 'Erreur inconnue'}`;
+      onError(errorMsg);
+      handleFileUploadError(error, 'response');
+    } finally {
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
   const handleUploadClick = () => {
-    fileInputRef.current?.click();
+    try {
+      fileInputRef.current?.click();
+    } catch (error) {
+      const errorMsg = 'Impossible d\'ouvrir la boîte de dialogue de sélection de fichiers';
+      onError(errorMsg);
+      handleFileUploadError(error, 'response');
+    }
   };
 
   return (

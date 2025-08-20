@@ -259,7 +259,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-                Matrice de corrélation (exemple)
+                Matrice de corrélation
               </Typography>
               <HeatmapChart 
                 data={processedData.statistics.questions.slice(0, 5)} 

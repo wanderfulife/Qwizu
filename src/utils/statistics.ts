@@ -32,6 +32,14 @@ export class StatisticsProcessor {
    * @returns Calculated statistics
    */
   static calculateStatistics(mappedData: MappedData, surveyStructure: SurveyStructure): SurveyStatistics {
+    if (!mappedData || !Array.isArray(mappedData)) {
+      throw new Error('Données mappées invalides. Une erreur est survenue lors du traitement des données.');
+    }
+    
+    if (!surveyStructure || !Array.isArray(surveyStructure)) {
+      throw new Error('Structure du questionnaire invalide. Une erreur est survenue lors du traitement des données.');
+    }
+    
     const totalRespondents = mappedData.length;
     
     // Calculate flow distribution

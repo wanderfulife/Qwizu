@@ -12,7 +12,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { ProcessedSurveyData } from '@/lib/surveyProcessor';
-import EnhancedDashboard from './EnhancedDashboard';
+import ProcessingPreview, { ProcessingPreviewSkeleton } from './ProcessingPreview';
 
 interface RealTimeVisualizationProps {
   processedData: ProcessedSurveyData | null;
@@ -79,6 +79,10 @@ const RealTimeVisualization: React.FC<RealTimeVisualizationProps> = ({
               {status}
             </Typography>
           </Box>
+          
+          <Box sx={{ mt: 4 }}>
+            <ProcessingPreviewSkeleton />
+          </Box>
         </CardContent>
       </Card>
     );
@@ -105,7 +109,7 @@ const RealTimeVisualization: React.FC<RealTimeVisualizationProps> = ({
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Visualisations en temps réel
+          Aperçu des résultats
         </Typography>
         <Chip 
           label="Données à jour" 
@@ -115,7 +119,7 @@ const RealTimeVisualization: React.FC<RealTimeVisualizationProps> = ({
         />
       </Box>
       
-      <EnhancedDashboard processedData={processedData} />
+      <ProcessingPreview processedData={processedData} />
     </Box>
   );
 };

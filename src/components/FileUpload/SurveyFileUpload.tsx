@@ -6,6 +6,7 @@ import {
   Description as DescriptionIcon,
   Info as InfoIcon
 } from '@mui/icons-material';
+import { useErrorHandler } from '@/utils/errorHandler';
 
 interface SurveyFileUploadProps {
   onFileUpload: (content: string, fileName: string) => void;
@@ -14,61 +15,111 @@ interface SurveyFileUploadProps {
 
 const SurveyFileUpload: React.FC<SurveyFileUploadProps> = ({ onFileUpload, onError }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { handleFileUploadError } = useErrorHandler();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    try {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    // Check file type
-    if (!file.name.endsWith('.js')) {
-      onError('Le fichier doit être un fichier JavaScript (.js)');
-      return;
-    }
-
-    // Check file size (limit to 1MB)
-    if (file.size > 1 * 1024 * 1024) {
-      onError('Le fichier est trop volumineux. La taille maximale autorisée est de 1 Mo.');
-      return;
-    }
-
-    // Read file content
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string;
-        // Basic validation of file content
-        if (!content || content.trim().length === 0) {
-          onError('Le fichier est vide ou corrompu');
-          return;
-        }
-        
-        // Check if it contains the expected export
-        if (!content.includes('export const templateSurveyQuestions')) {
-          onError('Le fichier ne contient pas la structure du questionnaire attendue (templateSurveyQuestions)');
-          return;
-        }
-        
-        onFileUpload(content, file.name);
-      } catch (error) {
-        onError(`Erreur lors de la lecture du fichier: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      // Check file type
+      if (!file.name.endsWith('.js')) {
+        const errorMsg = 'Le fichier doit être un fichier JavaScript (.js)';
+        onError(errorMsg);
+        handleFileUploadError(new Error(errorMsg), 'survey');
+        return;
       }
-    };
-    reader.onerror = () => {
-      onError('Erreur lors de la lecture du fichier. Veuillez vérifier que le fichier est accessible.');
-    };
-    reader.onabort = () => {
-      onError('Lecture du fichier interrompue');
-    };
-    reader.readAsText(file);
 
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      // Check file size (limit to 1MB)
+      if (file.size > 1 * 1024 * 1024) {
+        const errorMsg = 'Le fichier est trop volumineux. La taille maximale autorisée est de 1 Mo.';
+        onError(errorMsg);
+        handleFileUploadError(new Error(errorMsg), 'survey');
+        return;
+      }
+
+      // Read file content
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          // Basic validation of file content
+          if (!content || content.trim().length === 0) {
+            const errorMsg = 'Le fichier est vide ou corrompu';
+            onError(errorMsg);
+            handleFileUploadError(new Error(errorMsg), 'survey');
+            return;
+          }
+          
+          // Check if it contains the expected export
+          if (!content.includes('export const templateSurveyQuestions')) {
+            const errorMsg = 'Le fichier ne contient pas la structure du questionnaire attendue (templateSurveyQuestions)';
+            onError(errorMsg);
+            handleFileUploadError(new Error(errorMsg), 'survey');
+            return;
+          }
+          
+          // Additional validation for proper JavaScript syntax
+          try {
+            // Attempt to parse the JavaScript to check for syntax errors
+            // We first extract the array content to avoid issues with ES6 module syntax
+            const match = content.match(/export\s+const\s+templateSurveyQuestions\s*=\s*(\[[\s\S]*\])\s*;?/);
+            if (match) {
+              // Try to parse just the array content as JSON to check for basic syntax issues
+              const jsonArray = match[1]
+                .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+                .replace(/\/\/.*$/gm, '') // Remove single-line comments
+                .replace(/,\s*([}\]])/g, '$1') // Remove trailing commas
+                .replace(/([{,])\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":') // Add quotes to keys
+                .replace(/:\s*'([^']*)'/g, ':"$1"'); // Convert single quotes to double quotes
+              
+              JSON.parse(jsonArray);
+            }
+          } catch (syntaxError) {
+            const errorMsg = `Erreur de syntaxe dans le fichier JavaScript: ${(syntaxError as Error).message}`;
+            onError(errorMsg);
+            handleFileUploadError(new Error(errorMsg), 'survey');
+            return;
+          }
+          
+          onFileUpload(content, file.name);
+        } catch (error) {
+          const errorMsg = `Erreur lors de la lecture du fichier: ${error instanceof Error ? error.message : 'Erreur inconnue'}`;
+          onError(errorMsg);
+          handleFileUploadError(error, 'survey');
+        }
+      };
+      reader.onerror = () => {
+        const errorMsg = 'Erreur lors de la lecture du fichier. Veuillez vérifier que le fichier est accessible.';
+        onError(errorMsg);
+        handleFileUploadError(new Error(errorMsg), 'survey');
+      };
+      reader.onabort = () => {
+        const errorMsg = 'Lecture du fichier interrompue';
+        onError(errorMsg);
+        handleFileUploadError(new Error(errorMsg), 'survey');
+      };
+      reader.readAsText(file);
+    } catch (error) {
+      const errorMsg = `Erreur inattendue lors du traitement du fichier: ${error instanceof Error ? error.message : 'Erreur inconnue'}`;
+      onError(errorMsg);
+      handleFileUploadError(error, 'survey');
+    } finally {
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
   const handleUploadClick = () => {
-    fileInputRef.current?.click();
+    try {
+      fileInputRef.current?.click();
+    } catch (error) {
+      const errorMsg = 'Impossible d\'ouvrir la boîte de dialogue de sélection de fichiers';
+      onError(errorMsg);
+      handleFileUploadError(error, 'survey');
+    }
   };
 
   return (
