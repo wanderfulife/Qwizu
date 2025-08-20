@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Survey Data Processor
 
-## Getting Started
+Application web pour l'analyse des données de questionnaires de satisfaction.
 
-First, run the development server:
+## Fonctionnalités
+
+- Chargement de la structure du questionnaire (fichier JavaScript)
+- Chargement des réponses au questionnaire (fichier Excel)
+- Analyse et traitement des données
+- Visualisation des résultats sous forme de tableaux et de graphiques
+- Export des résultats
+
+## Technologies utilisées
+
+- [Next.js](https://nextjs.org/) - Framework React
+- [TypeScript](https://www.typescriptlang.org/) - Typage statique
+- [Material-UI](https://mui.com/) - Composants d'interface
+- [Chart.js](https://www.chartjs.org/) - Visualisation de données
+- [SheetJS](https://sheetjs.com/) - Lecture de fichiers Excel
+
+## Installation
+
+1. Cloner le repository
+2. Installer les dépendances :
+   ```bash
+   npm install
+   ```
+
+## Développement
+
+Pour lancer l'application en mode développement :
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+L'application sera accessible à l'adresse [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Structure du projet
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/              # Pages de l'application (Next.js App Router)
+│   ├── layout.tsx    # Layout principal avec Header et Footer
+│   ├── page.tsx      # Page d'accueil
+│   ├── processing/   # Page de traitement
+│   └── results/      # Page de résultats
+├── components/       # Composants React
+│   ├── FileUpload/   # Composants de chargement de fichiers
+│   ├── Layout/       # Composants de mise en page
+│   └── Visualization/ # Composants de visualisation
+├── lib/              # Logique métier
+├── utils/            # Fonctions utilitaires
+└── theme.ts          # Configuration du thème Material-UI
+```
 
-## Learn More
+## Architecture et flux de données
 
-To learn more about Next.js, take a look at the following resources:
+L'application suit une architecture modulaire avec une séparation claire des responsabilités :
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Page d'accueil** (`/`) - Chargement des fichiers
+   - Le composant `FileUploadContainer` gère le chargement de deux fichiers :
+     - Structure du questionnaire (fichier JavaScript)
+     - Réponses au questionnaire (fichier Excel)
+   - Les fichiers sont validés et stockés temporairement
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Page de traitement** (`/processing`) - Analyse des données
+   - La bibliothèque `SurveyProcessor` orchestre le processus :
+     - Parse la structure du questionnaire avec `SurveyParser`
+     - Lit les réponses Excel avec `ExcelParser`
+     - Mappe les réponses aux questions avec `DataMapper`
+     - Calcule les statistiques avec `StatisticsProcessor`
 
-## Deploy on Vercel
+3. **Page de résultats** (`/results`) - Visualisation
+   - Affichage des données sous plusieurs formes :
+     - Résumé des statistiques principales
+     - Analyse détaillée par question
+     - Visualisations (graphiques en barres, camemberts)
+     - Données brutes filtrables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Documentation complète
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Pour une documentation détaillée du projet, veuillez consulter le fichier [PROJECT-DOCUMENTATION.md](PROJECT-DOCUMENTATION.md) qui contient :
+- Spécifications techniques complètes
+- Structure des fichiers
+- Logique de traitement des données
+- Architecture de l'application
+- Considérations de performance et de sécurité
+
+## Utilisation
+
+1. Accédez à la page d'accueil
+2. Téléchargez le fichier de structure du questionnaire (format JavaScript)
+3. Téléchargez le fichier de réponses (format Excel)
+4. Cliquez sur "Traiter les fichiers"
+5. Consultez les résultats dans l'onglet "Résultats"
+
+## Contribution
+
+1. Forkez le projet
+2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/ma-fonctionnalité`)
+3. Commitez vos modifications (`git commit -am 'Ajout d'une fonctionnalité'`)
+4. Poussez la branche (`git push origin feature/ma-fonctionnalité`)
+5. Ouvrez une Pull Request
+
+## Points forts
+
+- Interface utilisateur intuitive et responsive
+- Traitement sécurisé des fichiers côté client (aucun envoi au serveur)
+- Visualisations variées des données (graphiques, tableaux, nuages de mots)
+- Gestion des différents types de questions du questionnaire
+- Support des flux conditionnels du questionnaire
+
+## Améliorations possibles
+
+- Export des résultats au format PDF ou Excel
+- Fonctionnalités avancées de filtrage et de tri
+- Analyses statistiques plus approfondies
+- Support de questionnaires multilingues
+- Mode de comparaison entre différents jeux de données
+
+## Licence
+
+Ce projet est sous licence MIT.

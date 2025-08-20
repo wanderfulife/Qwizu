@@ -1,103 +1,339 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState } from 'react';
+import { 
+  Container, 
+  Typography, 
+  Box, 
+  Grid, 
+  Card, 
+  CardContent, 
+  Button, 
+  Avatar,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  LinearProgress,
+  Paper
+} from '@mui/material';
+import { 
+  CloudUpload as CloudUploadIcon,
+  Description as DescriptionIcon,
+  TableChart as TableChartIcon,
+  Analytics as AnalyticsIcon,
+  CheckCircle as CheckCircleIcon,
+  ArrowForward as ArrowForwardIcon,
+  Storage as StorageIcon,
+  Speed as SpeedIcon,
+  Security as SecurityIcon,
+  TrendingUp as TrendingUpIcon
+} from '@mui/icons-material';
+import FileUploadContainer from '@/components/FileUpload/FileUploadContainer';
+import { useRouter } from 'next/navigation';
+import { useSurveyData } from '@/contexts/SurveyDataContext';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
+  const { setProcessedData, setSurveyContent, setResponseFile } = useSurveyData();
+  const [isUploading, setIsUploading] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const handleFilesUploaded = (surveyContent: string, responseFile: File) => {
+    setIsUploading(true);
+    // Clear any previous processed data
+    setProcessedData(null);
+    // Store the files in context
+    setSurveyContent(surveyContent);
+    setResponseFile(responseFile);
+    
+    // Simulate upload process
+    setTimeout(() => {
+      // Navigate to processing page
+      router.push('/processing');
+    }, 1500);
+  };
+
+  return (
+    <Container maxWidth="lg">
+      <Box sx={{ my: { xs: 2, md: 4 } }}>
+        {/* Hero Section */}
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Typography 
+            variant="h1" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, #2563eb 0%, #8b5cf6 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 2
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            SurveyInsights
+          </Typography>
+          
+          <Typography 
+            variant="h4" 
+            component="h2" 
+            sx={{ 
+              fontWeight: 600, 
+              mb: 3,
+              color: 'text.secondary'
+            }}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            Transformez vos données de sondage en insights actionnables
+          </Typography>
+          
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              maxWidth: 600, 
+              mx: 'auto',
+              color: 'text.secondary',
+              mb: 4
+            }}
+          >
+            Chargez votre structure de questionnaire et vos réponses pour une analyse complète 
+            avec visualisations avancées et rapports détaillés.
+          </Typography>
+        </Box>
+        
+        <Grid container spacing={4}>
+          {/* Upload Section */}
+          <Grid size={{ xs: 12, lg: 8 }}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                border: '1px solid',
+                borderColor: 'divider',
+                boxShadow: '0 8px 32px rgba(37, 99, 235, 0.1)'
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
+                    <CloudUploadIcon />
+                  </Avatar>
+                  <Typography variant="h5" component="h3" sx={{ fontWeight: 600 }}>
+                    Importez vos fichiers
+                  </Typography>
+                </Box>
+                
+                {isUploading ? (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <LinearProgress sx={{ mb: 3, borderRadius: 1 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                      Préparation des fichiers pour l&apos;analyse...
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      Cela peut prendre quelques instants
+                    </Typography>
+                  </Box>
+                ) : (
+                  <FileUploadContainer onFilesUploaded={handleFilesUploaded} />
+                )}
+                
+                <Box sx={{ mt: 4, p: 2, bgcolor: 'background.default', borderRadius: 2 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
+                    Formats supportés:
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 6, sm: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <DescriptionIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <Typography variant="body2">JavaScript (.js)</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <TableChartIcon sx={{ mr: 1, color: 'secondary.main' }} />
+                        <Typography variant="body2">Excel (.xlsx)</Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          {/* Features Section */}
+          <Grid size={{ xs: 12, lg: 4 }}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
+                    <AnalyticsIcon />
+                  </Avatar>
+                  <Typography variant="h5" component="h3" sx={{ fontWeight: 600 }}>
+                    Fonctionnalités
+                  </Typography>
+                </Box>
+                
+                <List sx={{ mb: 3 }}>
+                  <ListItem>
+                    <ListItemIcon>
+                      <CheckCircleIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Analyse automatique" 
+                      secondary="Traitement intelligent des données de sondage"
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemIcon>
+                      <CheckCircleIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Visualisations avancées" 
+                      secondary="Graphiques interactifs et tableaux de bord"
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemIcon>
+                      <CheckCircleIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Rapports détaillés" 
+                      secondary="Génération de rapports personnalisables"
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemIcon>
+                      <CheckCircleIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Export flexible" 
+                      secondary="Plusieurs formats de sortie disponibles"
+                    />
+                  </ListItem>
+                </List>
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
+                    Avantages
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid size={6}>
+                      <Box sx={{ textAlign: 'center', p: 1.5, bgcolor: 'background.default', borderRadius: 1 }}>
+                        <SpeedIcon sx={{ color: 'primary.main', mb: 0.5 }} />
+                        <Typography variant="body2" fontWeight={500}>Rapide</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid size={6}>
+                      <Box sx={{ textAlign: 'center', p: 1.5, bgcolor: 'background.default', borderRadius: 1 }}>
+                        <SecurityIcon sx={{ color: 'success.main', mb: 0.5 }} />
+                        <Typography variant="body2" fontWeight={500}>Sécurisé</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid size={6}>
+                      <Box sx={{ textAlign: 'center', p: 1.5, bgcolor: 'background.default', borderRadius: 1 }}>
+                        <TrendingUpIcon sx={{ color: 'secondary.main', mb: 0.5 }} />
+                        <Typography variant="body2" fontWeight={500}>Précis</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid size={6}>
+                      <Box sx={{ textAlign: 'center', p: 1.5, bgcolor: 'background.default', borderRadius: 1 }}>
+                        <StorageIcon sx={{ color: 'info.main', mb: 0.5 }} />
+                        <Typography variant="body2" fontWeight={500}>Scalable</Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+                
+                <Button
+                  variant="contained"
+                  fullWidth
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => router.push('/results')}
+                  disabled
+                  sx={{ mt: 2 }}
+                >
+                  Voir un exemple
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+        
+        {/* Stats Section */}
+        <Box sx={{ mt: 6, mb: 4 }}>
+          <Grid container spacing={3} justifyContent="center">
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  textAlign: 'center',
+                  height: '100%',
+                  background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)'
+                }}
+              >
+                <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                  10K+
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Analyses réalisées
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  textAlign: 'center',
+                  height: '100%',
+                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.1) 100%)'
+                }}
+              >
+                <Typography variant="h3" sx={{ fontWeight: 700, color: 'success.main' }}>
+                  99.9%
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Précision
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  textAlign: 'center',
+                  height: '100%',
+                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)'
+                }}
+              >
+                <Typography variant="h3" sx={{ fontWeight: 700, color: 'warning.main' }}>
+                  &lt;5s
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Temps de traitement
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  textAlign: 'center',
+                  height: '100%',
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)'
+                }}
+              >
+                <Typography variant="h3" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                  24/7
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Disponibilité
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    </Container>
   );
 }
