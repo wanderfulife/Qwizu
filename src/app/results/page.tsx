@@ -23,9 +23,7 @@ import {
   Select,
   MenuItem,
   Switch,
-  FormControlLabel,
-  Pagination,
-  PaginationItem
+  FormControlLabel
 } from '@mui/material';
 import { 
   Dashboard as DashboardIcon,
@@ -44,10 +42,10 @@ import { useRouter } from 'next/navigation';
 import { useSurveyData } from '@/contexts/SurveyDataContext';
 import { QuestionStatistics, ResponseCount } from '@/utils/statistics';
 import EnhancedDashboard from '@/components/Visualization/EnhancedDashboard';
-import DetailedQuestionAnalysis from '@/components/Visualization/DetailedQuestionAnalysis';
 import EnhancedBarChart from '@/components/Visualization/EnhancedBarChart';
 import EnhancedPieChart from '@/components/Visualization/EnhancedPieChart';
 import PaginatedQuestionsList from '@/components/Visualization/PaginatedQuestionsList';
+import VirtualizedQuestionsList from '@/components/Visualization/VirtualizedQuestionsList';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -91,12 +89,9 @@ export default function ResultsPage() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [chartMaxItems, setChartMaxItems] = useState(10);
   const [showRawData, setShowRawData] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    // Reset to first page when changing tabs
-    setCurrentPage(1);
   };
 
   const handleBackToUpload = () => {
@@ -375,7 +370,6 @@ export default function ResultsPage() {
                       label="Questions/page"
                       onChange={(e) => {
                         setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1); // Reset to first page when changing items per page
                       }}
                     >
                       <MenuItem value={3}>3</MenuItem>
@@ -419,40 +413,11 @@ export default function ResultsPage() {
                   itemsPerPage={itemsPerPage}
                 />
               ) : (
-                <Box>
-                  <Grid container spacing={3}>
-                    {statistics.questions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((question: QuestionStatistics) => (
-                      <Grid size={{ xs: 12 }} key={question.questionId}>
-                        <DetailedQuestionAnalysis 
-                          question={question} 
-                          totalRespondents={statistics.totalRespondents}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                  {/* Pagination for virtualization mode */}
-                  {statistics.questions.length > itemsPerPage && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                      <Pagination
-                        count={Math.ceil(statistics.questions.length / itemsPerPage)}
-                        page={currentPage}
-                        onChange={(event, page) => setCurrentPage(page)}
-                        renderItem={(item) => (
-                          <PaginationItem 
-                            {...item} 
-                            sx={{ 
-                              '&.Mui-selected': { 
-                                backgroundColor: 'primary.main', 
-                                color: 'white',
-                                fontWeight: 600
-                              } 
-                            }} 
-                          />
-                        )}
-                      />
-                    </Box>
-                  )}
-                </Box>
+                <VirtualizedQuestionsList
+                  questions={statistics.questions}
+                  totalRespondents={statistics.totalRespondents}
+                  windowHeight={600}
+                />
               )}
             </Box>
           )}
