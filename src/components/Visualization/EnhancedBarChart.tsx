@@ -154,6 +154,8 @@ const EnhancedBarChart: React.FC<EnhancedBarChartProps> = ({
           },
           maxRotation: 45,
           minRotation: 45,
+          autoSkip: false,
+          maxTicksLimit: 20,
         },
       },
       y: {
@@ -190,7 +192,7 @@ const EnhancedBarChart: React.FC<EnhancedBarChartProps> = ({
   const memoizedOptions = useMemo(() => options, []);
 
   return (
-    <div style={{ height: '100%', position: 'relative' }}>
+    <div style={{ height: '300px', position: 'relative', padding: '10px 0' }}>
       <Bar 
         data={memoizedChartData} 
         options={memoizedOptions}

@@ -95,6 +95,8 @@ const FlowComparisonChart: React.FC<FlowComparisonChartProps> = ({
           font: {
             size: 12,
           },
+          maxRotation: 0,
+          minRotation: 0,
         },
       },
       y: {
@@ -125,7 +127,7 @@ const FlowComparisonChart: React.FC<FlowComparisonChartProps> = ({
   const memoizedOptions = useMemo(() => options, []);
 
   return (
-    <div style={{ height: '200px', position: 'relative' }}>
+    <div style={{ height: '220px', position: 'relative', padding: '10px 0' }}>
       <Bar 
         data={memoizedChartData} 
         options={memoizedOptions}

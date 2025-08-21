@@ -101,8 +101,9 @@ const ResponseDistributionChart: React.FC<ResponseDistributionChartProps> = ({
         ticks: {
           backdropColor: 'rgba(0, 0, 0, 0)',
           font: {
-            size: 10,
+            size: 11,
           },
+          maxTicksLimit: 10,
         },
       },
     },
@@ -122,7 +123,7 @@ const ResponseDistributionChart: React.FC<ResponseDistributionChartProps> = ({
   const memoizedOptions = useMemo(() => options, []);
 
   return (
-    <div style={{ height: '200px', position: 'relative' }}>
+    <div style={{ height: '250px', position: 'relative', padding: '10px 0' }}>
       <PolarArea 
         data={memoizedChartData} 
         options={memoizedOptions}

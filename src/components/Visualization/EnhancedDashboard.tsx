@@ -14,7 +14,9 @@ import {
   MenuItem,
   SelectChangeEvent,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  Pagination,
+  Alert
 } from '@mui/material';
 import { 
   BarChart as BarChartIcon,
@@ -24,10 +26,9 @@ import { ProcessedSurveyData } from '@/lib/surveyProcessor';
 import { QuestionStatistics } from '@/utils/statistics';
 import EnhancedBarChart from './EnhancedBarChart';
 import EnhancedPieChart from './EnhancedPieChart';
-import HeatmapChart from './HeatmapChart';
+import HeatmapChart from './EnhancedHeatmapChart';
 import ResponseDistributionChart from './ResponseDistributionChart';
 import FlowComparisonChart from './FlowComparisonChart';
-import SegmentComparison from './SegmentComparison';
 
 import DashboardFilters from './DashboardFilters';
 import ExportVisualization from './ExportVisualization';
@@ -43,8 +44,10 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
   const [chartType, setChartType] = useState<string>('bar');
   const [showPercentages, setShowPercentages] = useState<boolean>(true);
   const [maxItemsToShow, setMaxItemsToShow] = useState<number>(10);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(6);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // Filter questions by flow type
+  // Filter questions by flow type and question type
   const filteredQuestions = useMemo(() => {
     let questions = processedData.statistics.questions;
     
@@ -70,7 +73,20 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
     return questions;
   }, [processedData.statistics.questions, selectedFlow, selectedQuestionType]);
 
-  // Get top questions by response count
+  // Use the original flow distribution data
+  const flowDistribution = processedData.statistics.flowDistribution;
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage);
+  
+  // Get questions for current page
+  const paginatedQuestions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredQuestions.slice(startIndex, endIndex);
+  }, [filteredQuestions, currentPage, itemsPerPage]);
+
+  // Get top questions by response count (from filtered set)
   const topQuestions = useMemo(() => {
     return [...filteredQuestions]
       .sort((a, b) => b.totalResponses - a.totalResponses)
@@ -79,14 +95,20 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
 
   const handleFlowChange = (flow: string) => {
     setSelectedFlow(flow);
+    // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleQuestionTypeChange = (questionType: string) => {
     setSelectedQuestionType(questionType);
+    // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleSegmentChange = (segment: string) => {
     setSelectedSegment(segment);
+    // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleChartTypeChange = (event: SelectChangeEvent) => {
@@ -95,6 +117,15 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
 
   const handleMaxItemsChange = (event: SelectChangeEvent) => {
     setMaxItemsToShow(Number(event.target.value));
+  };
+
+  const handleItemsPerPageChange = (event: SelectChangeEvent) => {
+    setItemsPerPage(Number(event.target.value));
+    setCurrentPage(1); // Reset to first page when items per page changes
+  };
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page);
   };
 
   const renderChart = (question: QuestionStatistics) => {
@@ -199,6 +230,20 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
             </Select>
           </FormControl>
           
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Questions/page</InputLabel>
+            <Select
+              value={itemsPerPage.toString()}
+              label="Questions/page"
+              onChange={handleItemsPerPageChange}
+            >
+              <MenuItem value={3}>3</MenuItem>
+              <MenuItem value={6}>6</MenuItem>
+              <MenuItem value={9}>9</MenuItem>
+              <MenuItem value={12}>12</MenuItem>
+            </Select>
+          </FormControl>
+          
           <FormControlLabel
             control={
               <Switch
@@ -224,17 +269,13 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
             Distribution des répondants par segment
           </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Répartition des répondants selon leur type d&apos;expérience utilisateur
+          </Typography>
           <FlowComparisonChart 
-            flowData={processedData.statistics.flowDistribution} 
+            flowData={flowDistribution} 
             totalRespondents={processedData.statistics.totalRespondents}
           />
-        </CardContent>
-      </Card>
-      
-      {/* Segment Comparison */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <SegmentComparison processedData={processedData} />
         </CardContent>
       </Card>
       
@@ -262,7 +303,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
                 Matrice de corrélation
               </Typography>
               <HeatmapChart 
-                data={processedData.statistics.questions.slice(0, 5)} 
+                data={filteredQuestions.slice(0, 5)} 
                 title="Corrélation entre les réponses"
               />
             </CardContent>
@@ -271,33 +312,60 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
       </Grid>
       
       {/* Detailed Question Visualizations */}
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-        Visualisations détaillées par question
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Visualisations détaillées par question
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {filteredQuestions.length} question(s) trouvée(s)
+        </Typography>
+      </Box>
       
-      <Grid container spacing={3}>
-        {topQuestions.map((question: QuestionStatistics) => (
-          <Grid size={{ xs: 12, md: 6 }} key={question.questionId}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {question.questionText}
-                  </Typography>
-                  <Chip 
-                    label={`${question.totalResponses} réponses`} 
-                    size="small"
-                    color={question.totalResponses > processedData.statistics.totalRespondents * 0.8 ? 'primary' : 'default'}
-                  />
-                </Box>
-                <Box sx={{ minHeight: 200 }}>
-                  {renderChart(question)}
-                </Box>
-              </CardContent>
-            </Card>
+      {filteredQuestions.length === 0 ? (
+        <Alert severity="info" sx={{ borderRadius: 2, mb: 3 }}>
+          Aucune question ne correspond aux filtres sélectionnés.
+        </Alert>
+      ) : (
+        <>
+          <Grid container spacing={3}>
+            {paginatedQuestions.map((question: QuestionStatistics) => (
+              <Grid size={{ xs: 12, md: 6 }} key={question.questionId}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        {question.questionText}
+                      </Typography>
+                      <Chip 
+                        label={`${question.totalResponses} réponses`} 
+                        size="small"
+                        color={question.totalResponses > processedData.statistics.totalRespondents * 0.8 ? 'primary' : 'default'}
+                      />
+                    </Box>
+                    <Box sx={{ minHeight: 200 }}>
+                      {renderChart(question)}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Pagination 
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                showFirstButton
+                showLastButton
+              />
+            </Box>
+          )}
+        </>
+      )}
     </Box>
   );
 };

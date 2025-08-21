@@ -166,7 +166,7 @@ const EnhancedPieChart: React.FC<EnhancedPieChartProps> = ({
   const memoizedOptions = useMemo(() => options, []);
 
   return (
-    <div style={{ height: '100%', position: 'relative' }}>
+    <div style={{ height: '300px', position: 'relative', padding: '10px 0' }}>
       <Pie 
         data={memoizedChartData} 
         options={memoizedOptions}
