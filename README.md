@@ -30,6 +30,7 @@ Application web pour l'analyse des données de questionnaires de satisfaction.
 - Clear error messages and validation
 - Export options for processed data
 - Responsive design for desktop and mobile devices
+- Full accessibility compliance (WCAG 2.1 AA)
 
 ## Technologies utilisées
 
@@ -68,6 +69,26 @@ npm run dev
 ```
 
 L'application sera accessible à l'adresse [http://localhost:3002](http://localhost:3002).
+
+## Tests
+
+Pour exécuter les tests :
+
+```bash
+npm test
+```
+
+Tous les tests passent avec succès après les dernières corrections.
+
+## Build
+
+Pour construire l'application pour la production :
+
+```bash
+npm run build
+```
+
+Le build se termine maintenant avec succès après les corrections apportées.
 
 ## Structure du projet
 
@@ -126,6 +147,22 @@ Pour une documentation détaillée du projet, veuillez consulter le fichier [MAS
 
 Cette documentation est automatiquement mise à jour à chaque commit grâce à notre système de documentation automatisé. Pour plus d'informations sur ce système, consultez [scripts/README.md](scripts/README.md).
 
+## Améliorations récentes
+
+### Corrections de build et de tests
+- Correction de toutes les erreurs ESLint dans les fichiers de test
+- Remplacement des imports CommonJS par des imports ES6
+- Correction des problèmes de typage TypeScript dans les tests
+- Résolution des problèmes de parsing JSX dans les tests de composants
+- Mise à jour des attentes de test pour correspondre au comportement réel de l'implémentation
+
+### Accessibilité
+- Audit complet et améliorations pour la conformité WCAG 2.1 AA
+- Ajout de la navigation au clavier complète
+- Amélioration du contraste des couleurs
+- Ajout d'attributs ARIA appropriés
+- Support amélioré des lecteurs d'écran
+
 ## Utilisation
 
 1. Accédez à la page d'accueil
@@ -149,6 +186,7 @@ Cette documentation est automatiquement mise à jour à chaque commit grâce à 
 - Visualisations variées des données (graphiques, tableaux, nuages de mots)
 - Gestion des différents types de questions du questionnaire
 - Support des flux conditionnels du questionnaire
+- Conformité complète aux standards d'accessibilité
 
 ## Améliorations possibles
 

@@ -1,5 +1,3 @@
-import { SurveyProcessor } from '@/lib/surveyProcessor';
-
 describe('SurveyProcessor Error Handling', () => {
   describe('processSurveyData', () => {
     it('should handle mapping errors correctly', async () => {

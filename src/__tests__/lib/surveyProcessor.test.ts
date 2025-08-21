@@ -1,8 +1,8 @@
 import { SurveyProcessor, ProcessedSurveyData } from '@/lib/surveyProcessor';
-import { SurveyStructure } from '@/utils/surveyParser';
-import { SurveyResponses } from '@/utils/excelParser';
-import { MappedData } from '@/utils/dataMapper';
-import { SurveyStatistics } from '@/utils/statistics';
+import { SurveyStructure, SurveyParser } from '@/utils/surveyParser';
+import { SurveyResponses, ExcelParser } from '@/utils/excelParser';
+import { MappedData, DataMapper } from '@/utils/dataMapper';
+import { SurveyStatistics, StatisticsProcessor } from '@/utils/statistics';
 
 // Mock the utility modules
 jest.mock('@/utils/surveyParser', () => {
@@ -90,11 +90,6 @@ describe('SurveyProcessor', () => {
     jest.clearAllMocks();
     
     // Setup default mock implementations
-    const { SurveyParser } = require('@/utils/surveyParser');
-    const { ExcelParser } = require('@/utils/excelParser');
-    const { DataMapper } = require('@/utils/dataMapper');
-    const { StatisticsProcessor } = require('@/utils/statistics');
-    
     (SurveyParser.parseSurveyContent as jest.Mock).mockReturnValue(mockSurveyStructure);
     (SurveyParser.validateSurveyStructure as jest.Mock).mockReturnValue([]);
     (ExcelParser.parseExcelFile as jest.Mock).mockResolvedValue(mockSurveyResponses);
@@ -117,11 +112,6 @@ describe('SurveyProcessor', () => {
       });
       
       // Verify all steps were called
-      const { SurveyParser } = require('@/utils/surveyParser');
-      const { ExcelParser } = require('@/utils/excelParser');
-      const { DataMapper } = require('@/utils/dataMapper');
-      const { StatisticsProcessor } = require('@/utils/statistics');
-      
       expect(SurveyParser.parseSurveyContent).toHaveBeenCalledWith(mockSurveyContent);
       expect(SurveyParser.validateSurveyStructure).toHaveBeenCalledWith(mockSurveyStructure);
       expect(ExcelParser.parseExcelFile).toHaveBeenCalledWith(mockResponseFile);
@@ -133,7 +123,6 @@ describe('SurveyProcessor', () => {
     });
 
     it('should include validation errors when present', async () => {
-      const { SurveyParser } = require('@/utils/surveyParser');
       (SurveyParser.validateSurveyStructure as jest.Mock).mockReturnValue(['Structure error']);
       
       const result = await SurveyProcessor.processSurveyData(mockSurveyContent, mockResponseFile);
@@ -144,7 +133,6 @@ describe('SurveyProcessor', () => {
     });
 
     it('should throw error when survey structure parsing fails', async () => {
-      const { SurveyParser } = require('@/utils/surveyParser');
       (SurveyParser.parseSurveyContent as jest.Mock).mockImplementation(() => {
         throw new Error('Parse error');
       });
@@ -155,7 +143,6 @@ describe('SurveyProcessor', () => {
     });
 
     it('should throw error when Excel parsing fails', async () => {
-      const { ExcelParser } = require('@/utils/excelParser');
       (ExcelParser.parseExcelFile as jest.Mock).mockRejectedValue(new Error('Excel parse error'));
       
       await expect(SurveyProcessor.processSurveyData(mockSurveyContent, mockResponseFile))
@@ -165,16 +152,11 @@ describe('SurveyProcessor', () => {
 
     it.skip('should throw error when data mapping fails', async () => {
       // Create a simple test that directly tests the error handling
-      const { DataMapper } = require('@/utils/dataMapper');
       (DataMapper.mapData as jest.Mock).mockImplementation(() => {
         throw new Error('Test error with mapping keyword');
       });
       
       // Mock all other steps to succeed
-      const { SurveyParser } = require('@/utils/surveyParser');
-      const { ExcelParser } = require('@/utils/excelParser');
-      const { StatisticsProcessor } = require('@/utils/statistics');
-      
       (SurveyParser.parseSurveyContent as jest.Mock).mockReturnValue(mockSurveyStructure);
       (SurveyParser.validateSurveyStructure as jest.Mock).mockReturnValue([]);
       (ExcelParser.parseExcelFile as jest.Mock).mockResolvedValue(mockSurveyResponses);
@@ -189,7 +171,6 @@ describe('SurveyProcessor', () => {
     });
 
     it('should throw error when statistics calculation fails', async () => {
-      const { StatisticsProcessor } = require('@/utils/statistics');
       (StatisticsProcessor.calculateStatistics as jest.Mock).mockImplementation(() => {
         throw new Error('Statistics error');
       });

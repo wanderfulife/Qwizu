@@ -1,4 +1,5 @@
-import { ExcelParser, SurveyResponse, SurveyResponses } from '@/utils/excelParser';
+import { ExcelParser, SurveyResponses } from '@/utils/excelParser';
+import * as xlsx from 'xlsx';
 
 // Mock the xlsx library
 jest.mock('xlsx', () => ({
@@ -36,7 +37,6 @@ describe('ExcelParser', () => {
         }
       ];
       
-      const xlsx = require('xlsx');
       (xlsx.read as jest.Mock).mockReturnValue(mockWorkbook);
       (xlsx.utils.sheet_to_json as jest.Mock).mockReturnValue(mockJsonData);
       
@@ -55,7 +55,6 @@ describe('ExcelParser', () => {
         SheetNames: []
       };
       
-      const xlsx = require('xlsx');
       (xlsx.read as jest.Mock).mockReturnValue(mockWorkbook);
       
       await expect(ExcelParser.parseExcelFile(mockFile)).rejects.toThrow('Le fichier Excel ne contient aucune feuille de calcul');
@@ -72,16 +71,14 @@ describe('ExcelParser', () => {
         }
       };
       
-      const xlsx = require('xlsx');
       (xlsx.read as jest.Mock).mockReturnValue(mockWorkbook);
       
-      await expect(ExcelParser.parseExcelFile(mockFile)).rejects.toThrow('La feuille de calcul \"Sheet1\" est vide ou corrompue');
+      await expect(ExcelParser.parseExcelFile(mockFile)).rejects.toThrow('La feuille de calcul "Sheet1" est vide ou corrompue');
     });
 
     it('should reject when file is not valid Excel', async () => {
       const mockFile = new File(['test'], 'test.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
-      const xlsx = require('xlsx');
       (xlsx.read as jest.Mock).mockImplementation(() => {
         throw new Error('Invalid file format');
       });
@@ -111,8 +108,7 @@ describe('ExcelParser', () => {
     it('should return false for missing required columns', () => {
       const invalidData: SurveyResponses = [
         {
-          Q1: '1', // Missing required columns
-          Q2: 'Developer'
+          Q1: '1' // Missing required columns
         }
       ];
       

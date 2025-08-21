@@ -1,4 +1,4 @@
-import { StatisticsProcessor, ResponseCount } from '@/utils/statistics';
+import { StatisticsProcessor } from '@/utils/statistics';
 import { MappedData } from '@/utils/dataMapper';
 import { SurveyStructure } from '@/utils/surveyParser';
 
@@ -92,7 +92,7 @@ describe('StatisticsProcessor', () => {
       ];
 
       expect(() => {
-        StatisticsProcessor.calculateStatistics(null as any, surveyStructure);
+        StatisticsProcessor.calculateStatistics(null as unknown as MappedData, surveyStructure);
       }).toThrow('Données mappées invalides');
     });
 
@@ -115,7 +115,7 @@ describe('StatisticsProcessor', () => {
       ];
 
       expect(() => {
-        StatisticsProcessor.calculateStatistics(mappedData, null as any);
+        StatisticsProcessor.calculateStatistics(mappedData, null as unknown as SurveyStructure);
       }).toThrow('Structure du questionnaire invalide');
     });
   });

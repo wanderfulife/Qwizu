@@ -105,13 +105,13 @@ describe('SurveyParser', () => {
     });
 
     it('should detect missing required fields', () => {
-      const invalidStructure: SurveyStructure = [
+      // Create an object that's missing the id field
+      const invalidStructure = [
         {
-          // Missing id
           text: 'Question without ID',
           type: 'freeText'
         }
-      ] as any; // Cast to any to bypass TypeScript checks for testing
+      ] as unknown as SurveyStructure;
       
       const errors = SurveyParser.validateSurveyStructure(invalidStructure);
       
@@ -119,20 +119,20 @@ describe('SurveyParser', () => {
     });
 
     it('should validate singleChoice question options', () => {
-      const invalidStructure: SurveyStructure = [
+      // Create an object that's missing the id field in options
+      const invalidStructure = [
         {
           id: 'Q1',
           text: 'Question with invalid options',
           type: 'singleChoice',
           options: [
             {
-              // Missing id
               text: 'Option without ID',
               next: 'Q2'
             }
           ]
         }
-      ] as any; // Cast to any to bypass TypeScript checks for testing
+      ] as unknown as SurveyStructure;
       
       const errors = SurveyParser.validateSurveyStructure(invalidStructure);
       
