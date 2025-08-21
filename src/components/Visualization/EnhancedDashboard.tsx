@@ -280,9 +280,9 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
       </Card>
       
       
-      {/* Key Insights */}
+      {/* Response Distribution Chart */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
@@ -295,21 +295,22 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ processedData }) 
             </CardContent>
           </Card>
         </Grid>
-        
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-                Matrice de corrélation
-              </Typography>
-              <HeatmapChart 
-                data={filteredQuestions.slice(0, 5)} 
-                title="Corrélation entre les réponses"
-              />
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
+      
+      {/* Full-width Correlation Matrix */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+            Matrice de corrélation
+          </Typography>
+          <Box sx={{ minHeight: '700px' }}>
+            <HeatmapChart 
+              data={filteredQuestions} 
+              title="Corrélation entre les réponses"
+            />
+          </Box>
+        </CardContent>
+      </Card>
       
       {/* Detailed Question Visualizations */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

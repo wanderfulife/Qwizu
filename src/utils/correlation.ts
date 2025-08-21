@@ -137,16 +137,16 @@ export function formatCorrelationData(
   questions: QuestionStatistics[]
 ) {
   const heatmapData = [];
-  const labels = questions.map(q => 
-    q.questionText.substring(0, 30) + (q.questionText.length > 30 ? '...' : '')
-  );
+  // Use full question texts without truncation for better display
+  const labels = questions.map(q => q.questionText);
   
   for (let i = 0; i < correlationMatrix.length; i++) {
     for (let j = 0; j < correlationMatrix[i].length; j++) {
+      // Use raw correlation values (between -1 and 1) instead of percentages
       heatmapData.push({
         x: labels[j],
         y: labels[i],
-        v: Math.round(correlationMatrix[i][j] * 100) // Convert to percentage for display
+        v: correlationMatrix[i][j]
       });
     }
   }
